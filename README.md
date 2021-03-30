@@ -8,7 +8,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/pmrmoura/Tear">
-    <img src="assets/logo.png" alt="Logo" width="108.73" height="210">
+    <img src="assets/logo.png" alt="Logo" width="210" height="210">
   </a>
 
   <h3 align="center">Gossip</h3>
@@ -40,8 +40,10 @@
 <!-- ABOUT THE PROJECT -->
 ## Sobre o projeto
 
-<img src="assets/Concluiu%20o%20jogo.png" alt="Screenshot 1" width="187.5" height="406"> <img src="assets/Mapa.png" alt="Screenshot 2" width="187.5" height="406">
-<img src="assets/Menu%20de%20Status%201.png" alt="Screenshot 3" width="187.5" height="406">
+<img src="/assets/Conversas.png" alt="Screenshot 1" width="187.5" height="406"> <img src="assets/Criar%20Salas.png" alt="Screenshot 2" width="187.5" height="406">
+<img src="/assets/Sala%20de%20Bate-papo.png" alt="Screenshot 3" width="187.5" height="406">
+<img src="/assets/Salas.png" alt="Screenshot 4" width="187.5" height="406">
+<img src="/assets/Vizinhos.png" alt="Screenshot 5" width="187.5" height="406">
 
 ### Tecnologias Envolvidas
 O projeto foi desenvolvido para dispositivos Android. A linguagem utilizada foi Kotlin e utilizamos alguns frameworks citados abaixo
