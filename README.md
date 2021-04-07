@@ -99,3 +99,7 @@ git pull develop
 [issues-shield]: https://img.shields.io/github/issues/DaniloLira/gossip-app.svg?style=flat-square
 [issues-url]: https://img.shields.io/github/issues/DaniloLira/gossip-app/
 [product-screenshot]: images/screenshot.png
+
+<!-- LINKS E REFERÊNCIAS
+https://www.geeksforgeeks.org/how-to-change-the-progressbar-color-in-android/
+-->

@@ -9,6 +9,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Gossip">
+        <activity android:name=".NovaSala"></activity>
+        <activity android:name=".Vizinhos" />
+        <activity android:name=".SalasMenu" />
+        <activity
+            android:name=".MenuPerfil"
+            android:label="@string/title_activity_m_enu"
+            android:theme="@style/Theme.Gossip.NoActionBar" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
