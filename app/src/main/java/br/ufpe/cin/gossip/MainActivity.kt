@@ -4,6 +4,7 @@ import android.app.LauncherActivity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
 
@@ -12,11 +13,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        userLoggedIn = isUserLoggedIn()
-//        if (!userLoggedIn) {
-//            val salasMenuIntent = Intent(this, SalasMenu::class.java)
-//            startActivity(salasMenuIntent)
-//        }
+
+        val salasMenuIntent = Intent(this, Register::class.java)
+        startActivity(salasMenuIntent)
     }
 
     private fun isUserLoggedIn () :Boolean {
