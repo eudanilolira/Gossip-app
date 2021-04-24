@@ -1,33 +1,23 @@
+/* Atividade de seleção de conversas
+
+Nessa tela o usuário pode escolher entrar em salas já conhecidas, ou visualizar conversas anteriores
+*/
 package br.ufpe.cin.gossip
 
-import android.content.Context
 import android.content.DialogInterface
-import android.content.IntentFilter
-import android.net.wifi.p2p.WifiP2pDevice
-import android.net.wifi.p2p.WifiP2pDeviceList
-import android.net.wifi.p2p.WifiP2pManager
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 
 class ChatSelectionActivity : AppCompatActivity() {
 
     private lateinit var userName: TextView
     private lateinit var peerDisplay: ListView
-    private lateinit var p2pManager: WifiP2pManager
-    private lateinit var p2pChannel: WifiP2pManager.Channel
-    private lateinit var wifiReceiver: WifiDirectBroadcastReceiver
-    private lateinit var p2pIntentFilter: IntentFilter
+    private lateinit var newRoomButton: Button
 
-    private val FINE_LOCATION_RQ_CODE: Int = 1
 
-    private lateinit var peerListListener: WifiP2pManager.PeerListListener
-    private var peerList = mutableListOf<WifiP2pDevice>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,28 +32,7 @@ class ChatSelectionActivity : AppCompatActivity() {
 
         peerDisplay = findViewById(R.id.peerDisplay)
 
-        p2pManager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
-        p2pChannel = p2pManager.initialize(this, Looper.getMainLooper(), null)
-        wifiReceiver = WifiDirectBroadcastReceiver(p2pManager, p2pChannel, this)
-
-        p2pIntentFilter = IntentFilter()
-        p2pIntentFilter.apply {
-            addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
-            addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
-            addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)
-            addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)
-            addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION)
-        }
-
-        peerListListener = object : WifiP2pManager.PeerListListener {
-
-            override fun onPeersAvailable(peers: WifiP2pDeviceList) {
-                if (peers.deviceList != peerList) {
-                    peerList.clear()
-                    peerList.addAll(peers.deviceList)
-                }
-            }
-        }
+        newRoomButton = findViewById(R.id.newRoomButton)
     }
 
     private fun setUpListeners () {
@@ -88,17 +57,11 @@ class ChatSelectionActivity : AppCompatActivity() {
             var dialog: AlertDialog = dialogBuilder.create()
             dialog.setView(nameInput)
             dialog.show()
-
         }
-    }
-
-    override fun onResume() {
-        registerReceiver(wifiReceiver, p2pIntentFilter)
-        super.onResume()
-    }
-
-    override fun onPause() {
-        unregisterReceiver(wifiReceiver)
-        super.onPause()
+        newRoomButton.setOnClickListener {
+            var newRoomIntent: Intent = Intent(this, NewRoomActivity::class.java)
+            newRoomIntent.putExtra("userName", userName.text.toString())
+            startActivity(newRoomIntent)
+        }
     }
 }

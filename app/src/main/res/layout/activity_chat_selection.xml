@@ -20,8 +20,8 @@
 
     <ListView
         android:id="@+id/peerDisplay"
-        android:layout_width="386dp"
-        android:layout_height="553dp"
+        android:layout_width="372dp"
+        android:layout_height="379dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
@@ -29,6 +29,17 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.478"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userNameDisplay" />
+        app:layout_constraintTop_toBottomOf="@+id/userNameDisplay"
+        app:layout_constraintVertical_bias="0.171" />
+
+    <Button
+        android:id="@+id/newRoomButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/peerDisplay"
+        app:layout_constraintTop_toBottomOf="@+id/peerDisplay" />
 </androidx.constraintlayout.widget.ConstraintLayout>

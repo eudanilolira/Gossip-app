@@ -26,6 +26,7 @@
         android:ems="10"
         android:hint="Display name"
         android:inputType="textPersonName"
+        android:imeOptions="actionSend"
         app:layout_constraintBottom_toTopOf="@+id/confirmButton"
         app:layout_constraintEnd_toEndOf="@+id/profilePicture"
         app:layout_constraintStart_toStartOf="@+id/profilePicture"

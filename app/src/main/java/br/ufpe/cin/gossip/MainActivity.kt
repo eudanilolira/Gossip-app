@@ -3,6 +3,7 @@ package br.ufpe.cin.gossip
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -40,11 +41,23 @@ class MainActivity : AppCompatActivity() {
             confirmButton.isEnabled = userNameEdit.text.toString().isNotEmpty()
         }
 
+        userNameEdit.setOnEditorActionListener { v, actionId, event ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_SEND -> {
+                    confirmButton.callOnClick()
+                    true
+                }
+                else -> false
+            }
+        }
+
         confirmButton.setOnClickListener {
-            var intent: Intent = Intent(this, ChatSelectionActivity::class.java)
-            intent.putExtra("userName", userNameEdit.text.toString())
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
+            if (it.isEnabled) {
+                var intent: Intent = Intent(this, ChatSelectionActivity::class.java)
+                intent.putExtra("userName", userNameEdit.text.toString())
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
         }
     }
 
