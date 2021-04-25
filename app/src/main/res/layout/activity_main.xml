@@ -19,7 +19,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <EditText
-        android:id="@+id/userName"
+        android:id="@+id/userNameEdit"
         style="@style/Widget.AppCompat.AutoCompleteTextView"
         android:layout_width="213dp"
         android:layout_height="53dp"
@@ -39,8 +39,8 @@
         android:layout_height="wrap_content"
         android:text="Confirmar"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/userName"
-        app:layout_constraintStart_toStartOf="@+id/userName"
+        app:layout_constraintEnd_toEndOf="@+id/userNameEdit"
+        app:layout_constraintStart_toStartOf="@+id/userNameEdit"
         app:layout_constraintTop_toBottomOf="@+id/profilePicture"
         app:layout_constraintVertical_bias="0.311" />
 </androidx.constraintlayout.widget.ConstraintLayout>

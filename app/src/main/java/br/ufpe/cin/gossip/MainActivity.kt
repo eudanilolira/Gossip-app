@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startComponents () {
         profilePicture = findViewById(R.id.profilePicture)
-        userNameEdit = findViewById(R.id.userName)
+        userNameEdit = findViewById(R.id.userNameEdit)
         confirmButton = findViewById(R.id.confirmButton)
         confirmButton.isEnabled = false
 
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         confirmButton.setOnClickListener {
             if (it.isEnabled) {
                 var intent: Intent = Intent(this, ChatSelectionActivity::class.java)
-                intent.putExtra("userName", userNameEdit.text.toString())
+                GossipApplication.userName = userNameEdit.text.toString()
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
             }
