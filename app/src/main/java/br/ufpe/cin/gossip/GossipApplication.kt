@@ -5,10 +5,13 @@ import android.app.Application
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.nsd.NsdManager
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
+import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -16,6 +19,7 @@ class GossipApplication : Application () {
 
     companion object {
         var userName: String = ""
+        var profilePicture: Bitmap? = null
 
         var permissionsNeeded: Array<String> = arrayOf(
             android.Manifest.permission.ACCESS_WIFI_STATE,
@@ -32,9 +36,13 @@ class GossipApplication : Application () {
         lateinit var p2pIntentFilter: IntentFilter
 
         var runingServer: Boolean = false
+
+        val MESSAGE_READ = 10
+
         var FINE_LOCATION_RQ = 1
 
         var ALL_PERMISSONS_CODE = 101
+        var roomServer: RoomServer? = null
 
     }
 

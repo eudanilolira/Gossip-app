@@ -20,7 +20,6 @@ class NewRoomActivity : AppCompatActivity() {
     private lateinit var descriptionEdit: EditText
     private lateinit var createButton: Button
     var tag: String = "NewRoom"
-    private var roomServer: RoomServer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +46,8 @@ class NewRoomActivity : AppCompatActivity() {
         val roomSocket = ServerSocket(0)
         var serviceInfoMap: Map<String, String> = mapOf(
             "roomName" to roomNameEdit.text.toString(),
-            "servicePort" to roomSocket.localPort.toString()
+            "servicePort" to roomSocket.localPort.toString(),
+            "ownerName" to GossipApplication.userName
         )
         var serviceInfo: WifiP2pDnsSdServiceInfo = WifiP2pDnsSdServiceInfo.newInstance(
             "_${serviceInfoMap["roomName"]}", "_gossip.tcp", serviceInfoMap
@@ -69,8 +69,9 @@ class NewRoomActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext,
                         "Service registered as ${roomNameEdit.text}",
                         Toast.LENGTH_SHORT).show()
-                    roomServer = RoomServer(roomSocket)
-                    roomServer?.start()
+                    GossipApplication.runingServer = true
+                    GossipApplication.roomServer = RoomServer(roomSocket)
+                    GossipApplication.roomServer?.start()
                 }
                 override fun onFailure(reason: Int) {
                     Toast.makeText(applicationContext,
@@ -92,10 +93,9 @@ class NewRoomActivity : AppCompatActivity() {
                 override fun onFailure(reason: Int) {
                     Log.d(tag, "Service Request Action Listener Failed to Start. Error Code: $reason")
                 }
-
             }
         )
-
         Log.d(tag, "Button click call executed")
+        finish()
     }
 }
