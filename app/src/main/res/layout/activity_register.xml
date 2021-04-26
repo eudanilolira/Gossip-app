@@ -12,17 +12,16 @@
         android:id="@+id/editTextRegisterEmail"
         android:layout_width="316dp"
         android:layout_height="46dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="52dp"
+        android:background="@drawable/round_corners"
         android:ems="10"
         android:hint="Seu e-mail"
-        android:paddingLeft="16dp"
         android:inputType="textPersonName"
-        android:background="@drawable/round_corners"
+        android:paddingLeft="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
-
+        app:layout_constraintTop_toBottomOf="@+id/selectPhotoButton" />
 
     <EditText
         android:id="@+id/editTextRegisterPassword"
@@ -54,17 +53,6 @@
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
-        android:layout_marginTop="28dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo_4x" />
-
     <Button
         android:id="@+id/goToLoginActivity"
         android:layout_width="wrap_content"
@@ -77,4 +65,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/registerButton" />
 
+    <Button
+        android:id="@+id/selectPhotoButton"
+        style="@android:style/Widget.Button"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/select_photo_button"
+        android:text="Foto de perfil"
+        android:textColor="@color/backgroundColor"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/select_image_circle"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        app:layout_constraintBottom_toBottomOf="@+id/selectPhotoButton"
+        app:layout_constraintEnd_toEndOf="@+id/selectPhotoButton"
+        app:layout_constraintStart_toStartOf="@+id/selectPhotoButton"
+        app:layout_constraintTop_toTopOf="@+id/selectPhotoButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 package br.ufpe.cin.gossip
 
+import FirebaseGlobals.firebaseUser
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,8 +8,12 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_activiy)
@@ -37,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
         val duration = Toast.LENGTH_SHORT
 
         if (email.isNullOrBlank() || password.isNullOrBlank()) {
-            text = "Preenchar os dois campos"
+            text = "Preencha os dois campos"
             val toast = Toast.makeText(applicationContext, text, duration)
             toast.show()
             return
@@ -49,7 +54,8 @@ class LoginActivity : AppCompatActivity() {
                     text = "Login realizado com sucesso!"
                     val toast = Toast.makeText(applicationContext, text, duration)
                     toast.show()
-                    val salasMenu = Intent(this, SalasMenu::class.java)
+                    val salasMenu = Intent(this, NavbarActivity::class.java)
+                    salasMenu.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(salasMenu)
                 }
             }

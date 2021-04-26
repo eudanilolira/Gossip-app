@@ -9,7 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Gossip">
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".NavbarActivity"></activity>
+        <activity android:name=".ConversasActivity" />
+        <activity android:name=".LoginActivity" />
         <activity android:name=".Register" />
         <activity android:name=".NovaSala" />
         <activity android:name=".Vizinhos" />
