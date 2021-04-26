@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.nsd.NsdManager
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
 import android.os.Looper
@@ -30,9 +31,12 @@ class GossipApplication : Application () {
         lateinit var broadcastReceiver: WifiDirectBroadcastReceiver
         lateinit var p2pIntentFilter: IntentFilter
 
-    }
+        var runingServer: Boolean = false
+        var FINE_LOCATION_RQ = 1
 
-    private var PERMISSIONS_ALL = 1
+        var ALL_PERMISSONS_CODE = 101
+
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -47,6 +51,5 @@ class GossipApplication : Application () {
             addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)
             addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
         }
-
     }
 }

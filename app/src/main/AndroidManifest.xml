@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Gossip">
-        <activity android:name=".FindRoomActivity"></activity>
+        <activity android:name=".RoomViewActivity"></activity>
+        <activity android:name=".FindRoomActivity" />
         <activity android:name=".NewRoomActivity" />
         <activity android:name=".ChatSelectionActivity" />
         <activity android:name=".MainActivity">

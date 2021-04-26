@@ -1,12 +1,18 @@
 package br.ufpe.cin.gossip
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pManager
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.core.app.ActivityCompat
 import androidx.core.widget.addTextChangedListener
 
 class MainActivity : AppCompatActivity() {
@@ -14,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var profilePicture: ImageView
     private lateinit var userNameEdit: EditText
     private lateinit var confirmButton: Button
-
+    private var tag: String = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,5 +66,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 }

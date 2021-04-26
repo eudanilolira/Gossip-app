@@ -4,13 +4,19 @@ Nessa tela o usuário pode escolher entrar em salas já conhecidas, ou visualiza
 */
 package br.ufpe.cin.gossip
 
+import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pManager
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 
 class ChatSelectionActivity : AppCompatActivity() {
 
@@ -19,11 +25,14 @@ class ChatSelectionActivity : AppCompatActivity() {
     private lateinit var newRoomButton: Button
     private lateinit var searchRoomButton: Button
 
+    var tag: String = "ChatSelection"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_selection)
-        startComponents()
-        setUpListeners()
+
+        startComponents ()
+        setUpListeners ()
     }
 
     override fun onResume() {
@@ -42,7 +51,7 @@ class ChatSelectionActivity : AppCompatActivity() {
 
         peerDisplay = findViewById(R.id.peerDisplay)
         newRoomButton = findViewById(R.id.newRoomButton)
-        searchRoomButton = findViewById(R.id.searchRoomButton)
+        searchRoomButton = findViewById(R.id.serachRoomButton)
 
     }
 
@@ -96,5 +105,4 @@ class ChatSelectionActivity : AppCompatActivity() {
             startActivity(searchRoomIntent)
         }
     }
-
 }
