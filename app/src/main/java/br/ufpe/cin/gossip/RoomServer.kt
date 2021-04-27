@@ -19,7 +19,11 @@ class RoomServer ( private val socket: ServerSocket ) : Thread () {
     }
 
     fun receiveMessage (msg: String, handler: RoomClientHandler) {
-
+        for (client: RoomClientHandler in clientSockets) {
+            if (client.clientName != handler.clientName) {
+                client.sendMessage(msg)
+            }
+        }
     }
 
     fun clientHandshake (clientInfo: Map<String, String>, handler: RoomClientHandler) {

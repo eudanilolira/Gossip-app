@@ -2,27 +2,11 @@
 
 package br.ufpe.cin.gossip
 
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
-
-// Source: https://stackoverflow.com/questions/44870961/how-to-map-a-json-string-to-kotlin-map
-fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
-    when (val value = this[it])
-    {
-        is JSONArray ->
-        {
-            val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
-            JSONObject(map).toMap().values.toList()
-        }
-        is JSONObject -> value.toMap()
-        JSONObject.NULL -> null
-        else            -> value
-    }
-}
 
 class RoomClientHandler (val clientSocket: Socket) : Thread (){
     private var tag: String  = "RoomClientHandler"
@@ -46,7 +30,7 @@ class RoomClientHandler (val clientSocket: Socket) : Thread (){
     fun sendMessage(msg: String) {
         var mapMessage: Map<String, String> = mapOf(
             "packetType" to "message",
-            "content" to "msg"
+            "content" to msg
         )
         var msgString = JSONObject(mapMessage).toString()
         Thread {
@@ -72,6 +56,15 @@ class RoomClientHandler (val clientSocket: Socket) : Thread (){
                     "profilePicture" to ""
                 )
                 GossipApplication.roomServer?.clientHandshake(clientInfo, this)
+            }
+            "updatePicture" -> {
+
+            }
+            "updateUsername" -> {
+
+            }
+            "leave" -> {
+
             }
         }
     }
