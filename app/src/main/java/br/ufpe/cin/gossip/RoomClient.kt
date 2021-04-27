@@ -59,7 +59,7 @@ class RoomClient (private var hostAddress: String, private var servicePort: Int)
         }
     }
 
-    fun sendMessage(message: String) {
+    private fun sendMessage(message: String) {
         var mapMessage: Map<String, String> = mapOf(
             "packetType" to "message",
             "content" to message
