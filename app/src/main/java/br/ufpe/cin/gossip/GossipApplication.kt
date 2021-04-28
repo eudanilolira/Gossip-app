@@ -43,6 +43,7 @@ class GossipApplication : Application () {
 
         var ALL_PERMISSONS_CODE = 101
         var roomServer: RoomServer? = null
+        var roomList: MutableList<RoomItem> = mutableListOf()
 
     }
 

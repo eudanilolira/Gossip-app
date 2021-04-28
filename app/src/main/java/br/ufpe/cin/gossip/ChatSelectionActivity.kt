@@ -30,6 +30,7 @@ class ChatSelectionActivity : AppCompatActivity() {
     private lateinit var peerDisplay: RecyclerView
     private lateinit var newRoomButton: Button
     private lateinit var searchRoomButton: Button
+    private val adapter = GroupAdapter<GroupieViewHolder>()
 
     var tag: String = "ChatSelection"
 
@@ -58,12 +59,6 @@ class ChatSelectionActivity : AppCompatActivity() {
     }
 
     private fun startComponents () {
-        val adapter = GroupAdapter<GroupieViewHolder>()
-
-        adapter.add(RoomItem())
-        adapter.add(RoomItem())
-        adapter.add(RoomItem())
-
         peerDisplay = findViewById(R.id.peerDisplay)
         peerDisplay.adapter = adapter
 
@@ -72,7 +67,6 @@ class ChatSelectionActivity : AppCompatActivity() {
 
         newRoomButton = findViewById(R.id.newRoomButton)
         searchRoomButton = findViewById(R.id.serachRoomButton)
-
     }
 
     private fun setUpListeners () {
@@ -123,6 +117,10 @@ class ChatSelectionActivity : AppCompatActivity() {
         searchRoomButton.setOnClickListener {
             discoverServices()
         }
+
+//        adapter.setOnItemClickListener {
+//
+//        }
     }
 
     private fun discoverServices () {
@@ -140,6 +138,9 @@ class ChatSelectionActivity : AppCompatActivity() {
 
         val txtListener = WifiP2pManager.DnsSdTxtRecordListener { fullDomain, record, device ->
             Log.d(tag, "DnSdTxtRecord available - $fullDomain, $record, $device")
+            GossipApplication.roomList.add(
+                RoomItem(record["roomName"].toString(), record["roomDescription"].toString(), record["roomImage"].toString(), device )
+            )
         }
 
         val serviceListener = WifiP2pManager.DnsSdServiceResponseListener {
@@ -183,13 +184,3 @@ class ChatSelectionActivity : AppCompatActivity() {
     }
 }
 
-class RoomItem: Item<GroupieViewHolder>() {
-    override fun getLayout(): Int {
-        return R.layout.room_item_resource
-    }
-
-    override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-
-    }
-
-}
