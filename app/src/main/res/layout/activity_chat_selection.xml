@@ -18,30 +18,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ListView
-        android:id="@+id/peerDisplay"
-        android:layout_width="372dp"
-        android:layout_height="379dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.478"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userNameDisplay"
-        app:layout_constraintVertical_bias="0.171" />
-
     <Button
         android:id="@+id/newRoomButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="+"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/peerDisplay"
-        app:layout_constraintTop_toBottomOf="@+id/peerDisplay" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/serachRoomButton"
@@ -49,7 +32,15 @@
         android:layout_height="wrap_content"
         android:text="Procurar"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/newRoomButton"
-        app:layout_constraintTop_toBottomOf="@+id/peerDisplay" />
+        app:layout_constraintEnd_toStartOf="@+id/newRoomButton" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/peerDisplay"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_width="match_parent"
+        android:layout_height="588dp"
+        android:layout_marginTop="7dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userNameDisplay" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

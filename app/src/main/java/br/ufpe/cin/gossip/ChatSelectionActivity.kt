@@ -13,15 +13,21 @@ import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.RecyclerView
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.GroupieAdapter
+import com.xwray.groupie.GroupieViewHolder
+import com.xwray.groupie.Item
 
 class ChatSelectionActivity : AppCompatActivity() {
 
     private lateinit var userName: TextView
-    private lateinit var peerDisplay: ListView
+    private lateinit var peerDisplay: RecyclerView
     private lateinit var newRoomButton: Button
     private lateinit var searchRoomButton: Button
 
@@ -52,10 +58,18 @@ class ChatSelectionActivity : AppCompatActivity() {
     }
 
     private fun startComponents () {
+        val adapter = GroupAdapter<GroupieViewHolder>()
+
+        adapter.add(RoomItem())
+        adapter.add(RoomItem())
+        adapter.add(RoomItem())
+
+        peerDisplay = findViewById(R.id.peerDisplay)
+        peerDisplay.adapter = adapter
+
         userName = findViewById(R.id.userNameDisplay)
         userName.text = GossipApplication.userName
 
-        peerDisplay = findViewById(R.id.peerDisplay)
         newRoomButton = findViewById(R.id.newRoomButton)
         searchRoomButton = findViewById(R.id.serachRoomButton)
 
@@ -167,4 +181,15 @@ class ChatSelectionActivity : AppCompatActivity() {
             }
         )
     }
+}
+
+class RoomItem: Item<GroupieViewHolder>() {
+    override fun getLayout(): Int {
+        return R.layout.room_item_resource
+    }
+
+    override fun bind(viewHolder: GroupieViewHolder, position: Int) {
+
+    }
+
 }
