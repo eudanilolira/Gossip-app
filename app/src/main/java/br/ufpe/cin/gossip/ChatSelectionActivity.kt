@@ -60,6 +60,10 @@ class ChatSelectionActivity : AppCompatActivity() {
 
     private fun startComponents () {
         peerDisplay = findViewById(R.id.peerDisplay)
+
+        adapter.add(RoomItem("Nome da sala", "Descrição da sala", "Imagem", null))
+        adapter.add(RoomItem("Nome da minha sala", "Descrição da salasdfsdf", "Imagem", null))
+
         peerDisplay.adapter = adapter
 
         userName = findViewById(R.id.userNameDisplay)
