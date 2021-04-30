@@ -34,9 +34,19 @@ class ClientRoomActivity : AppCompatActivity() {
         adapter.add(ChatToItem(" Fala galera"))
         adapter.add(ChatFromItem("Boa noite pra quem??"))
 
+        chat_button.setOnClickListener {
+            this.performSendMessage()
+        }
+
         chat_recycler_view.adapter = adapter
+    }
 
+    private fun performSendMessage() {
+        val message = chat_edit_text.text.toString()
+        adapter.add(ChatToItem(message))
 
-
+        chat_edit_text.text.clear()
+        chat_edit_text.clearFocus()
+        chat_recycler_view.scrollToPosition(adapter.itemCount)
     }
 }

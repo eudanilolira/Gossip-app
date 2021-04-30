@@ -24,6 +24,7 @@ class NewRoomActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_room)
+        supportActionBar?.title = "Nova Sala"
 
         startComponents()
         setupListeners()

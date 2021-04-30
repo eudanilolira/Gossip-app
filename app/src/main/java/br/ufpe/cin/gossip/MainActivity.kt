@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
             profilePicture .setImageBitmap(imageBitmap)
             profilePictureButton.alpha = 0F
+            GossipApplication.profilePicture = imageBitmap
         }
     }
 

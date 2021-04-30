@@ -30,6 +30,7 @@ class ChatSelectionActivity : AppCompatActivity() {
     private lateinit var peerDisplay: RecyclerView
     private lateinit var newRoomButton: Button
     private lateinit var searchRoomButton: Button
+    private lateinit var profilePicture: ImageView
     private val adapter = GroupAdapter<GroupieViewHolder>()
 
     var tag: String = "ChatSelection"
@@ -37,9 +38,12 @@ class ChatSelectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_selection)
+        supportActionBar?.title = "Salas"
 
         startComponents ()
         setUpListeners ()
+
+
 
     }
 
@@ -59,6 +63,9 @@ class ChatSelectionActivity : AppCompatActivity() {
     }
 
     private fun startComponents () {
+        profilePicture = findViewById(R.id.profilePicture)
+        profilePicture.setImageBitmap(GossipApplication.profilePicture)
+
         peerDisplay = findViewById(R.id.peerDisplay)
 
         adapter.add(RoomItem("Nome da sala", "Descrição da sala", "Imagem", null))
@@ -86,7 +93,7 @@ class ChatSelectionActivity : AppCompatActivity() {
             nameInput.layoutParams = lp
 
             dialogBuilder.apply {
-                setTitle("Change Username")
+                setTitle("Novo nome de usuário")
                 setPositiveButton("Ok") { _: DialogInterface, _: Int ->
                     if (nameInput.text.toString().isNotEmpty()) {
                         userName.text = nameInput.text.toString()
