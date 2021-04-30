@@ -30,9 +30,9 @@ class ClientRoomActivity : AppCompatActivity() {
         chat_button = findViewById(R.id.chat_button)
         chat_edit_text = findViewById(R.id.chat_edit_text)
 
-        adapter.add(ChatFromItem())
-        adapter.add(ChatToItem())
-        adapter.add(ChatFromItem())
+        adapter.add(ChatFromItem("Boa noite grupo"))
+        adapter.add(ChatToItem(" Fala galera"))
+        adapter.add(ChatFromItem("Boa noite pra quem??"))
 
         chat_recycler_view.adapter = adapter
 
