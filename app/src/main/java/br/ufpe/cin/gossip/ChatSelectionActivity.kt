@@ -122,9 +122,16 @@ class ChatSelectionActivity : AppCompatActivity() {
             discoverServices()
         }
 
-//        adapter.setOnItemClickListener {
-//
-//        }
+        adapter.setOnItemClickListener { item, view ->
+            val roomItem = item as RoomItem
+            val intent = Intent(view.context, ClientRoomActivity::class.java)
+            intent.putExtra(ROOM_KEY, roomItem.roomName)
+            startActivity(intent)
+        }
+    }
+
+    companion object {
+        val ROOM_KEY = "ROOM_KEY"
     }
 
     private fun discoverServices () {

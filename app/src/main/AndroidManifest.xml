@@ -18,7 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Gossip">
         <activity android:name=".ServerRoomActivity"></activity>
-        <activity android:name=".ClientRoomActivity" />
+        <activity android:name=".ClientRoomActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value=".FindRoomActivity" />
+        </activity>
         <activity android:name=".RoomViewActivity" />
         <activity android:name=".FindRoomActivity" />
         <activity android:name=".NewRoomActivity" />
