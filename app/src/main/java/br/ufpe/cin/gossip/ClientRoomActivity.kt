@@ -20,8 +20,10 @@ class ClientRoomActivity : AppCompatActivity() {
         setContentView(R.layout.activity_client_room)
         startComponents()
 
-        val roomsName = intent.getStringExtra(ChatSelectionActivity.ROOM_KEY)
+        val roomsName = GossipApplication.roomClient?.roomItem?.roomName
         supportActionBar?.title = roomsName
+
+        GossipApplication.roomClient?.receiveActivity(this)
 
     }
 
@@ -43,6 +45,7 @@ class ClientRoomActivity : AppCompatActivity() {
 
     private fun performSendMessage() {
         val message = chat_edit_text.text.toString()
+        GossipApplication.roomClient?.sendMessage(message)
         adapter.add(ChatToItem(message))
 
         chat_edit_text.text.clear()

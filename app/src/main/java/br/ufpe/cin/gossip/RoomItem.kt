@@ -1,24 +1,32 @@
 package br.ufpe.cin.gossip
 
-import android.media.Image
+import android.annotation.SuppressLint
 import android.net.wifi.p2p.WifiP2pDevice
+import android.os.Build
+import android.util.Base64
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
 
-class RoomItem (
-     var roomName: String,
-     var roomDescription: String,
-     var roomImage: String,
-     var device: WifiP2pDevice?
-): Item<GroupieViewHolder>() {
+@RequiresApi(Build.VERSION_CODES.N)
+class RoomItem (record: Map<String, String>, var device: WifiP2pDevice): Item<GroupieViewHolder>() {
 
-    override fun getLayout(): Int {
-        var layout = R.layout.room_item_resource
-        return layout
-    }
+    var roomName: String = record.getOrDefault("roomName", "Sem nome")
+    var roomDescription: String = record.getOrDefault("roomDescription", "Sem descrição")
+
+//    var roomName: String = Base64.decode(
+//        record.getOrDefault("roomName", "Sem nome").toByteArray(), 0
+//    ).toString()
+//    var roomDescription: String = Base64.decode(
+//        record.getOrDefault("roomDescription", "Sem descrição").toByteArray(), 0
+//    ).toString()
+    val roomImage = record.getOrDefault("roomImage", "")
+    val port: Int = record["servicePort"].toString().toInt()
+
+    override fun getLayout() = R.layout.room_item_resource
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         var roomName = viewHolder.itemView.findViewById<TextView>(R.id.roomName)
@@ -29,4 +37,9 @@ class RoomItem (
         roomDescription.text = this.roomDescription
         Picasso.get().load("http://i.imgur.com/DvpvklR.png").into(roomImage);
     }
+    override fun equals (other: Any?)
+    = (other is RoomItem)
+            && other.device == device
+            && other.roomName == roomName
+            && other.roomDescription == roomDescription
 }

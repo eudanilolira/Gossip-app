@@ -1,14 +1,18 @@
-
+/**
+ * Essa classe existe do lado do servidor, ela gerencia os pacotes recebidos pelo cliente e as envia
+ * para as funções específicas do RoomServer da aplicação
+ */
 
 package br.ufpe.cin.gossip
 
+import android.util.Log
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
 
-class RoomClientHandler (val clientSocket: Socket) : Thread (){
+class RoomClientHandler (private val clientSocket: Socket) : Thread (){
     private var tag: String  = "RoomClientHandler"
     private var inputStream: InputStream = clientSocket.getInputStream()
     private var outputStream: OutputStream = clientSocket.getOutputStream()
@@ -47,7 +51,10 @@ class RoomClientHandler (val clientSocket: Socket) : Thread (){
     private fun verifyReceivedMessage (message: Map<String, String>) {
         when(message["packetType"]) {
             "message" -> {
-                GossipApplication.roomServer?.receiveMessage(message["content"].toString(), this)
+                Log.d(tag, "Mensagem Recebida")
+                val sender = message["userName"]
+                val content = message["content"]
+                GossipApplication.roomServer?.receiveMessage("$sender: $content", this)
             }
             "handshake" -> {
                 clientName = message["userName"].toString()

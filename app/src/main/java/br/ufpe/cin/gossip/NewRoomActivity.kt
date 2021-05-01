@@ -1,17 +1,21 @@
 package br.ufpe.cin.gossip
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import java.net.ServerSocket
 
@@ -28,6 +32,8 @@ class NewRoomActivity : AppCompatActivity() {
 
         startComponents()
         setupListeners()
+
+
     }
 
     private fun startComponents() {
@@ -44,14 +50,45 @@ class NewRoomActivity : AppCompatActivity() {
     }
 
     private fun registerChatService() {
+
+        if (GossipApplication.servInfo != null) {
+            GossipApplication.p2pManager.removeLocalService(
+                GossipApplication.p2pChannel, GossipApplication.servInfo,
+                object: WifiP2pManager.ActionListener {
+                    override fun onSuccess() {
+                        Log.d(tag, "Service unregistered")
+                    }
+
+                    override fun onFailure(reason: Int) {
+                        Log.d(tag, "Failed to unregister service")
+                    }
+
+                }
+            )
+            GossipApplication.p2pManager.removeGroup(
+                GossipApplication.p2pChannel,
+                object : WifiP2pManager.ActionListener {
+                    override fun onSuccess() {
+                        Log.d(tag, "Group removed")
+                    }
+                    override fun onFailure(reason: Int) {
+                        Log.d(tag, "Failed to remove Group")
+                    }
+                }
+            )
+        }
+
         val roomSocket = ServerSocket(0)
+        var rName = roomNameEdit.text.toString()
         var serviceInfoMap: Map<String, String> = mapOf(
-            "roomName" to roomNameEdit.text.toString(),
+            "roomName" to rName,
+            "roomDescription" to descriptionEdit.text.toString(),
             "servicePort" to roomSocket.localPort.toString(),
             "ownerName" to GossipApplication.userName
         )
+        Log.d(tag, serviceInfoMap.toString())
         var serviceInfo: WifiP2pDnsSdServiceInfo = WifiP2pDnsSdServiceInfo.newInstance(
-            "_${serviceInfoMap["roomName"]}", "_gossip.tcp", serviceInfoMap
+            "_${rName}", "_gossip.tcp", serviceInfoMap
         )
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -70,9 +107,15 @@ class NewRoomActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext,
                         "Service registered as ${roomNameEdit.text}",
                         Toast.LENGTH_SHORT).show()
-                    GossipApplication.runingServer = true
+
+                    GossipApplication.servInfo = serviceInfo
+
+                    GossipApplication.runningServer = true
                     GossipApplication.roomServer = RoomServer(roomSocket)
                     GossipApplication.roomServer?.start()
+                    var newIntent = Intent(applicationContext, ServerRoomActivity::class.java)
+                    newIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(newIntent)
                 }
                 override fun onFailure(reason: Int) {
                     Toast.makeText(applicationContext,
@@ -81,22 +124,6 @@ class NewRoomActivity : AppCompatActivity() {
                 }
             }
         )
-
-        var serviceRequest = WifiP2pDnsSdServiceRequest.newInstance()
-        GossipApplication.p2pManager.addServiceRequest(
-            GossipApplication.p2pChannel,
-            serviceRequest,
-            object : WifiP2pManager.ActionListener {
-                override fun onSuccess() {
-                    Log.d(tag, "Service Request Action Listener Started")
-                }
-
-                override fun onFailure(reason: Int) {
-                    Log.d(tag, "Service Request Action Listener Failed to Start. Error Code: $reason")
-                }
-            }
-        )
         Log.d(tag, "Button click call executed")
-        finish()
     }
 }

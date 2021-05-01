@@ -32,6 +32,10 @@ class MainActivity : AppCompatActivity() {
 
         startComponents()
         setUpListeners()
+
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.INTERNET), GossipApplication.INTERNET_RQ
+        )
     }
 
     private fun startComponents () {

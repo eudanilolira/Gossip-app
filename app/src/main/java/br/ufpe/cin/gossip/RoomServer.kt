@@ -6,11 +6,13 @@ import java.net.Socket
 
 class RoomServer ( private val socket: ServerSocket ) : Thread () {
     var clientSockets = mutableListOf<RoomClientHandler>()
-    var clientByName: Map<String, RoomClientHandler> = mapOf()
+    var clientByName: MutableMap<String, RoomClientHandler> = mutableMapOf()
     private var tag: String = "RoomServer"
+    private lateinit var roomActivity: ServerRoomActivity
     override fun run() {
         var running = true
         while (running) {
+            Log.d(tag, "RoomServer iniciado")
             var client_socket = socket.accept()
             var clientHandler = RoomClientHandler(client_socket)
             clientSockets.add(clientHandler)
@@ -28,9 +30,12 @@ class RoomServer ( private val socket: ServerSocket ) : Thread () {
 
     fun clientHandshake (clientInfo: Map<String, String>, handler: RoomClientHandler) {
         val name: String = clientInfo["userName"].toString()
-        clientByName.apply {
-            name to handler
-        }
+        clientByName[name] = handler
+        roomActivity.changeText("$name entrou na sala")
+    }
+
+    fun receiveActivity (serverRoomActivity: ServerRoomActivity) {
+        if (!this::roomActivity.isInitialized) roomActivity = serverRoomActivity
     }
 
 }

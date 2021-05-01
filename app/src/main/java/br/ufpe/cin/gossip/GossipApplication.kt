@@ -8,12 +8,15 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.nsd.NsdManager
 import android.net.wifi.p2p.WifiP2pManager
+import android.net.wifi.p2p.nsd.WifiP2pServiceInfo
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.net.InetAddress
 
 class GossipApplication : Application () {
 
@@ -35,15 +38,21 @@ class GossipApplication : Application () {
         lateinit var broadcastReceiver: WifiDirectBroadcastReceiver
         lateinit var p2pIntentFilter: IntentFilter
 
-        var runingServer: Boolean = false
+        var runningServer: Boolean = false
 
         val MESSAGE_READ = 10
 
         var FINE_LOCATION_RQ = 1
+        var INTERNET_RQ = 2
 
         var ALL_PERMISSONS_CODE = 101
         var roomServer: RoomServer? = null
+        var roomClient: RoomClient? = null
         var roomList: MutableList<RoomItem> = mutableListOf()
+
+        var servInfo: WifiP2pServiceInfo? = null
+
+        lateinit var connectionInfoListener: WifiP2pManager.ConnectionInfoListener
 
     }
 
