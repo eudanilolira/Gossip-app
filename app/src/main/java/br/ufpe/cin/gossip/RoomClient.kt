@@ -5,57 +5,65 @@
 **/
 package br.ufpe.cin.gossip
 
-import android.provider.Settings
 import android.util.Log
-import androidx.core.app.ActivityCompat
-import kotlinx.coroutines.GlobalScope
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.net.NetworkInterface
 import java.net.Socket
-import java.util.*
 
-class RoomClient (private var servicePort: Int, var roomItem: RoomItem? = null) : Thread () {
-    private lateinit var hostAddress: InetAddress
-    private var socket: Socket = Socket()
+class RoomClient (private var hostAddress: InetAddress, private var servicePort: Int) : Thread () {
+    private lateinit var socket: Socket
     private lateinit var inputStream: InputStream
     private lateinit var outputStream: OutputStream
-    private var connected: Boolean = false
-    private lateinit var roomActivity: ClientRoomActivity
+    private var connected: Boolean = true
+    private lateinit var clientRoomActivity: ClientRoomActivity
+    var userName: String = ""
 
     private var tag: String = "RoomClient"
 
-    fun receiveHostAddress(address: InetAddress) {
-        if (this::hostAddress.isInitialized) return
-        hostAddress = address
-    }
-
     override fun run() {
         try {
-            Log.d(tag, "Conectando a $hostAddress:$servicePort")
+            socket = Socket ()
             socket.connect(InetSocketAddress(hostAddress, servicePort))
-            connected = true
             inputStream = socket.getInputStream()
             outputStream = socket.getOutputStream()
-            Log.d(tag, "Socket conectado com sucesso")
+            Log.i(tag, "Socket connected successfully")
         }
         catch (e: IOException) {
             e.printStackTrace()
-            Log.d(tag, "Erro ao conectar socket")
+            connected = false
+            Log.e(tag, "Failed to connect to Socket")
+            return
         }
         if (connected) handShake()
-        while (connected) {
-            var buffer = ByteArray(1024)
-            var bytes: Int
-            bytes = inputStream.read(buffer)
-            if (bytes > 0) {
-                var tmpMsg: String = String(buffer, 0, bytes)
-                var receivedJson = JSONObject(tmpMsg).toMap()
-                verifyReceivedMessage(receivedJson as Map<String, String>)
+        var buffer = ByteArray(1024)
+        var bytes: Int
+        while (socket != null) {
+            try {
+                bytes = inputStream.read(buffer)
+                if (bytes > 0) {
+                    var tmpMsg = String(buffer, 0, bytes)
+                    val map = JSONObject(tmpMsg).toMap()
+                    Log.d(tag, "$map")
+                    var code =
+                        when(map["packetType"].toString())
+                        {
+                            "message" -> ClientRoomActivity.MESSAGE_RECEIVED
+                            "updatePicture" -> ClientRoomActivity.CHANGE_PICTURE
+                            "updateUsername" -> ClientRoomActivity.CHANGE_USERNAME
+                            "leave" -> ClientRoomActivity.LEAVE_ROOM
+                            "hello" -> ClientRoomActivity.HELLO
+                            else -> 0
+                        }
+                    clientRoomActivity.handler.obtainMessage( code, map ).sendToTarget()
+                }
+            }
+            catch (e: IOException) {
+                e.printStackTrace()
+                Log.e(tag, "Failed to receive message")
             }
         }
     }
@@ -63,60 +71,44 @@ class RoomClient (private var servicePort: Int, var roomItem: RoomItem? = null) 
     private fun handShake() {
         var myInfo: Map<String, String> = mapOf(
             "userName" to GossipApplication.userName,
-            "profilePicture" to ""
+            "profilePicture" to "",
+            "packetType" to "handshake"
         )
-        sendMessage(JSONObject(myInfo).toString())
-    }
-
-    private fun verifyReceivedMessage(json: Map<String, String>) {
-        when (json["packetType"]){
-            "message" -> {
-                var content = json["content"].toString()
-                roomActivity?.adapter.add(
-                    ChatFromItem(content)
-                )
-            }
-            "updatePicture" -> {
-
-            }
-            "updateUserName" -> {
-
-            }
-            "leave" -> {
-
-            }
-        }
+        writeToSocket(myInfo)
     }
 
     fun sendMessage(message: String) {
-        var mapMessage: Map<String, String> = mapOf(
+        var messagePacket: Map<String, String> = mapOf(
+            "userName" to GossipApplication.userName,
             "packetType" to "message",
-            "content" to message,
-            "userName" to GossipApplication.userName
+            "content" to message
         )
+        writeToSocket(messagePacket)
+    }
+
+    fun writeToSocket(mapMessage: Map<String, String>) {
+
         var msgString = JSONObject(mapMessage).toString()
         Thread {
             try {
                 outputStream.write(msgString.toByteArray())
-                Log.d(tag, "Mensagem enviada com sucesso")
+                Log.d(tag, "Message send successfully")
             }
             catch (e: IOException) {
                 e.printStackTrace()
+                Log.e(tag, "Failed to send message")
             }
-        }
+        }.start()
     }
 
     fun receiveActivity (activityCompat: ClientRoomActivity) {
-        if (!this::roomActivity.isInitialized) {
-            roomActivity = activityCompat as ClientRoomActivity
+        if (!this::clientRoomActivity.isInitialized) {
+            clientRoomActivity = activityCompat
         }
     }
 
     fun closeSocket (){
         if (this.isAlive) this.interrupt()
         socket.close()
-    }
-
-    private fun getHostIpAddress() {
     }
 }

@@ -25,28 +25,34 @@ class GossipApplication : Application () {
         var profilePicture: Bitmap? = null
         var roomName: String = ""
 
-        lateinit var nsdManager: NsdManager
-
         lateinit var p2pManager: WifiP2pManager
         lateinit var p2pChannel: WifiP2pManager.Channel
         lateinit var broadcastReceiver: WifiDirectBroadcastReceiver
         lateinit var p2pIntentFilter: IntentFilter
 
-        var runningServer: Boolean = false
+        lateinit var nsdManager: NsdManager
+        lateinit var nsdDiscoveryListener: NsdManager.DiscoveryListener
+        lateinit var registrationListener: NsdManager.RegistrationListener
 
-        val MESSAGE_READ = 10
+        var runningServer: Boolean = false
 
         var FINE_LOCATION_RQ = 1
         var INTERNET_RQ = 2
 
-        var ALL_PERMISSONS_CODE = 101
         var roomServer: RoomServer? = null
-        var roomClient: RoomClient? = null
+        var room: RoomItem? = null
         var roomList: MutableList<RoomItem> = mutableListOf()
 
-        var servInfo: WifiP2pServiceInfo? = null
-
         lateinit var connectionInfoListener: WifiP2pManager.ConnectionInfoListener
+
+        fun tearDownServices() {
+            if (this::nsdManager.isInitialized && this::nsdDiscoveryListener.isInitialized) {
+                nsdManager.stopServiceDiscovery(nsdDiscoveryListener)
+            }
+            if (this::nsdManager.isInitialized && this::registrationListener.isInitialized) {
+                nsdManager.unregisterService(registrationListener)
+            }
+        }
 
     }
 
@@ -67,4 +73,5 @@ class GossipApplication : Application () {
             addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)
         }
     }
+
 }

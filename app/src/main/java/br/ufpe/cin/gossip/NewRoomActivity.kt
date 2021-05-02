@@ -41,6 +41,11 @@ class NewRoomActivity : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        GossipApplication.room = null
+        super.onDestroy()
+    }
+
     private fun startComponents() {
         roomNameEdit = findViewById(R.id.roomNameEdit)
         descriptionEdit = findViewById(R.id.roomDescriptionEdit)
@@ -80,8 +85,9 @@ class NewRoomActivity : AppCompatActivity() {
             override fun onServiceRegistered(serviceInfo: NsdServiceInfo?) {
                 GossipApplication.roomName = serviceInfo?.serviceName.toString()
                 Log.d(tag, "Room registerd as ${GossipApplication.roomName}")
+                GossipApplication.registrationListener =registrationListener
 
-                GossipApplication.roomServer = RoomServer(socket)
+                GossipApplication.roomServer = RoomServer(socket).apply { start() }
                 var newIntent = Intent (applicationContext, ServerRoomActivity::class.java)
                 newIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(newIntent)

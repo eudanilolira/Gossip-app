@@ -2,40 +2,43 @@ package br.ufpe.cin.gossip
 
 import android.util.Log
 import java.net.ServerSocket
-import java.net.Socket
 
 class RoomServer ( private val socket: ServerSocket ) : Thread () {
     var clientSockets = mutableListOf<RoomClientHandler>()
-    var clientByName: MutableMap<String, RoomClientHandler> = mutableMapOf()
     private var tag: String = "RoomServer"
-    private lateinit var roomActivity: ServerRoomActivity
+    lateinit var serverRoomActivity: ServerRoomActivity
     override fun run() {
         var running = true
         while (running) {
-            Log.d(tag, "RoomServer iniciado")
-            var client_socket = socket.accept()
-            var clientHandler = RoomClientHandler(client_socket)
+            Log.d(tag, "Started Server Activity")
+            var clientSocket = socket.accept()
+            var clientHandler = RoomClientHandler(clientSocket).apply { start() }
             clientSockets.add(clientHandler)
-            Log.d(tag, "Connection receive from ${client_socket.inetAddress}")
+            Log.d(tag, "Connection receive from ${clientSocket.inetAddress}:${clientSocket.port}")
         }
     }
 
-    fun receiveMessage (msg: String, handler: RoomClientHandler) {
-        for (client: RoomClientHandler in clientSockets) {
-            if (client.clientName != handler.clientName) {
-                client.sendMessage(msg)
+    fun receiveActivity (activity: ServerRoomActivity) {
+        if (!this::serverRoomActivity.isInitialized) serverRoomActivity = activity
+    }
+
+    fun broadcastMessage (messageMap: Map<String, String>, sender: String = "") {
+        for (roomClientHandler: RoomClientHandler in clientSockets) {
+            if (sender == "" || roomClientHandler.userName != sender) {
+                Log.d(tag, "Message\"$messageMap\" sent to ${roomClientHandler.userName}")
+                roomClientHandler.writeToSocket(messageMap)
             }
         }
     }
 
-    fun clientHandshake (clientInfo: Map<String, String>, handler: RoomClientHandler) {
-        val name: String = clientInfo["userName"].toString()
-        clientByName[name] = handler
-        roomActivity.changeText("$name entrou na sala")
-    }
-
-    fun receiveActivity (serverRoomActivity: ServerRoomActivity) {
-        if (!this::roomActivity.isInitialized) roomActivity = serverRoomActivity
+    fun sendMessage(message: String) {
+        var messagePacket: Map<String, String> = mapOf(
+            "userName" to GossipApplication.userName,
+            "packetType" to "message",
+            "content" to message
+        )
+        Log.d(tag, "Username: ${GossipApplication.userName}")
+        broadcastMessage(messagePacket)
     }
 
 }

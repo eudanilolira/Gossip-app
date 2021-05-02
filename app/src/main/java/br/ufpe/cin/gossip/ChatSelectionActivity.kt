@@ -66,8 +66,13 @@ class ChatSelectionActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        unregisterReceiver(GossipApplication.broadcastReceiver)
+        GossipApplication.tearDownServices()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        GossipApplication.tearDownServices()
+        super.onDestroy()
     }
 
     private fun startComponents () {
@@ -92,9 +97,7 @@ class ChatSelectionActivity : AppCompatActivity() {
             }
             else if (info.groupFormed) {
                 Log.d(tag, "Connected to $ownerAddress")
-                GossipApplication.roomClient?.receiveHostAddress(ownerAddress)
-                GossipApplication.roomClient?.start()
-                if (GossipApplication.roomClient != null){
+                if (GossipApplication.room != null){
                     var newIntent = Intent (applicationContext, ClientRoomActivity::class.java)
                     newIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(newIntent)
@@ -107,52 +110,10 @@ class ChatSelectionActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     private fun setUpListeners () {
-        userName.setOnClickListener {
-            val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(this)
-
-            val nameInput: EditText = EditText(this)
-            var lp: LinearLayout.LayoutParams = LinearLayout.LayoutParams (
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-                    )
-
-            nameInput.layoutParams = lp
-
-            dialogBuilder.apply {
-                setTitle("Novo nome de usuário")
-                setPositiveButton("Ok") { _: DialogInterface, _: Int ->
-                    if (nameInput.text.toString().isNotEmpty()) {
-                        userName.text = nameInput.text.toString()
-                        GossipApplication.userName = userName.text.toString()
-                    }
-                }
-                setNegativeButton("Cancel") {_: DialogInterface, _: Int -> }
-            }
-
-            var dialog: AlertDialog = dialogBuilder.create()
-
-            nameInput.imeOptions = EditorInfo.IME_ACTION_SEND
-            nameInput.inputType = EditorInfo.TYPE_TEXT_VARIATION_PERSON_NAME
-            nameInput.setOnEditorActionListener { v, actionId, event ->
-                when (actionId) {
-                    EditorInfo.IME_ACTION_SEND -> {
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).callOnClick()
-                        true
-                    }
-                    else -> false
-                }
-            }
-
-            dialog.setView(nameInput)
-            dialog.show()
-        }
         newRoomButton.setOnClickListener {
             if (!GossipApplication.runningServer) {
                 var newRoomIntent: Intent = Intent(this, NewRoomActivity::class.java)
                 startActivity(newRoomIntent)
-            }
-            else {
-                Toast.makeText(applicationContext, "Você já possui uma sala", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -161,7 +122,14 @@ class ChatSelectionActivity : AppCompatActivity() {
         }
 
         adapter.setOnItemClickListener { item, view ->
+            val roomItem = item as RoomItem
 
+            if (roomItem.roomClient == null) roomItem.connect()
+            if (roomItem != null ) {
+                GossipApplication.room = roomItem
+                var newIntent = Intent (applicationContext, ClientRoomActivity::class.java)
+                startActivity(newIntent)
+            }
         }
     }
 
@@ -169,6 +137,8 @@ class ChatSelectionActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     private fun discoverServices () {
         Log.d(tag, "Discover Services Function Called")
+
+        GossipApplication.tearDownServices()
 
         val resolveListener = object : NsdManager.ResolveListener {
             override fun onResolveFailed(serviceInfo: NsdServiceInfo?, errorCode: Int) {
@@ -224,9 +194,8 @@ class ChatSelectionActivity : AppCompatActivity() {
                 }
 
             }
-
         }
-
+        GossipApplication.nsdDiscoveryListener = discoveryListener
 
         GossipApplication.nsdManager.discoverServices(
             "_gossip._tcp",

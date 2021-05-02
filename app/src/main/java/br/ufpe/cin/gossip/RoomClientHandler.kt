@@ -5,7 +5,11 @@
 
 package br.ufpe.cin.gossip
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
+import com.beust.klaxon.JsonObject
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -16,26 +20,44 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
     private var tag: String  = "RoomClientHandler"
     private var inputStream: InputStream = clientSocket.getInputStream()
     private var outputStream: OutputStream = clientSocket.getOutputStream()
-    var clientName: String = ""
+    private var serverRoomActivity: ServerRoomActivity = GossipApplication.roomServer!!.serverRoomActivity
+    var userName: String = ""
 
     override fun run() {
+        Log.d(tag, "Running")
         var buffer = ByteArray(1024)
         var bytes: Int
         while (clientSocket != null) {
-            bytes = inputStream.read(buffer)
-            if (bytes > 0) {
-                var tmpMsg: String = String(buffer, 0, bytes)
-                var receivedJson = JSONObject(tmpMsg).toMap()
-                verifyReceivedMessage(receivedJson as Map<String, String>)
+            try {
+                bytes = inputStream.read(buffer)
+                if (bytes > 0) {
+                    var tmpMsg = String(buffer, 0, bytes)
+                    val map = JSONObject(tmpMsg).toMap()
+                    Log.d(tag, "Message Received: $map")
+                    var code =
+                    when(map["packetType"].toString())
+                    {
+                        "message" -> ClientRoomActivity.MESSAGE_RECEIVED
+                        "handshake" -> ClientRoomActivity.HANDSHAKE
+                        "updatePicture" -> ClientRoomActivity.CHANGE_PICTURE
+                        "updateUsername" -> ClientRoomActivity.CHANGE_USERNAME
+                        "leave" -> ClientRoomActivity.LEAVE_ROOM
+                        else -> 0
+                    }
+                    serverRoomActivity.handler.obtainMessage( code, map ).sendToTarget()
+
+                    if (code == ClientRoomActivity.HANDSHAKE && userName == "") {
+                        userName = map["userName"].toString()
+                    }
+                }
+            }
+            catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
 
-    fun sendMessage(msg: String) {
-        var mapMessage: Map<String, String> = mapOf(
-            "packetType" to "message",
-            "content" to msg
-        )
+    fun writeToSocket(mapMessage: Map<String, String>) {
         var msgString = JSONObject(mapMessage).toString()
         Thread {
             try {
@@ -44,35 +66,7 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
             catch (e: IOException) {
                 e.printStackTrace()
             }
-        }
+        }.start()
 
-    }
-
-    private fun verifyReceivedMessage (message: Map<String, String>) {
-        when(message["packetType"]) {
-            "message" -> {
-                Log.d(tag, "Mensagem Recebida")
-                val sender = message["userName"]
-                val content = message["content"]
-                GossipApplication.roomServer?.receiveMessage("$sender: $content", this)
-            }
-            "handshake" -> {
-                clientName = message["userName"].toString()
-                var clientInfo: Map<String, String> = mapOf(
-                    "userName" to message["userName"].toString(),
-                    "profilePicture" to ""
-                )
-                GossipApplication.roomServer?.clientHandshake(clientInfo, this)
-            }
-            "updatePicture" -> {
-
-            }
-            "updateUsername" -> {
-
-            }
-            "leave" -> {
-
-            }
-        }
     }
 }

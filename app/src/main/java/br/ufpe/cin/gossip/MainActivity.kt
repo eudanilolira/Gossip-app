@@ -84,8 +84,8 @@ class MainActivity : AppCompatActivity() {
 
         confirmButton.setOnClickListener {
             if (it.isEnabled) {
-                var intent: Intent = Intent(this, ChatSelectionActivity::class.java)
                 GossipApplication.userName = userNameEdit.text.toString()
+                var intent: Intent = Intent(this, ChatSelectionActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
             }

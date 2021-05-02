@@ -6,12 +6,18 @@ import android.net.wifi.aware.PeerHandle
 import android.net.wifi.p2p.WifiP2pManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 
 class ServerRoomActivity : AppCompatActivity() {
     private lateinit var lastReceivedMessage: TextView
+    private lateinit var answerButton: Button
+    lateinit var handler: Handler
 
     private val tag: String = "ServerRoomActivity"
 
@@ -22,40 +28,35 @@ class ServerRoomActivity : AppCompatActivity() {
         GossipApplication.roomServer?.receiveActivity(this)
 
         startComponents()
-        discoverPeers()
+        setUpListeners()
     }
 
     private fun startComponents() {
         lastReceivedMessage = findViewById(R.id.lastReceivedMessage)
-    }
+        answerButton = findViewById(R.id.answerTest)
 
-    fun changeText(msg: String) {
-        lastReceivedMessage.text = msg
-    }
-
-    private fun discoverPeers () {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            GossipApplication.p2pManager.discoverPeers(
-                GossipApplication.p2pChannel,
-                object : WifiP2pManager.ActionListener {
-                    override fun onSuccess() {
-                        Log.d(tag, "Peer discovery started")
+        handler = Handler(object : Handler.Callback {
+            override fun handleMessage(msg: Message): Boolean {
+                Log.d(tag, "Handler Called")
+                var map = msg.obj as Map<String, String>
+                when (msg.what) {
+                    ClientRoomActivity.HANDSHAKE -> {
+                        Toast.makeText(this@ServerRoomActivity, "${map["userName"]} entrou na sala", Toast.LENGTH_SHORT).show()
                     }
-
-                    override fun onFailure(reason: Int) {
-                        Log.d(tag, "Peer discovery failed")
+                    ClientRoomActivity.MESSAGE_RECEIVED -> {
+                        lastReceivedMessage.text = "${map["userName"]}: ${map["content"]}"
                     }
-
                 }
-            )
-        }
-        else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                GossipApplication.FINE_LOCATION_RQ)
+                return true
+            }
+
+        })
+    }
+
+    private fun setUpListeners () {
+        answerButton.setOnClickListener {
+            GossipApplication.roomServer?.sendMessage("Lana rainha, o resto é nadinha!")
         }
     }
+
 }

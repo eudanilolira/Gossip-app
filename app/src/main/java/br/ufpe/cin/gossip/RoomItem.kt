@@ -1,31 +1,26 @@
 package br.ufpe.cin.gossip
 
-import android.annotation.SuppressLint
-import android.net.wifi.p2p.WifiP2pDevice
-import android.os.Build
-import android.util.Base64
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
+import java.io.IOException
 import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 
-@RequiresApi(Build.VERSION_CODES.N)
 class RoomItem (
     var roomName: String,
     var roomDescription: String,
     private var host: InetAddress,
     private var servicePort: Int
-): Item<GroupieViewHolder>() {
+)
+    : Item<GroupieViewHolder>() {
+    var roomClient: RoomClient? = null
 
-//    var roomName: String = Base64.decode(
-//        record.getOrDefault("roomName", "Sem nome").toByteArray(), 0
-//    ).toString()
-//    var roomDescription: String = Base64.decode(
-//        record.getOrDefault("roomDescription", "Sem descrição").toByteArray(), 0
-//    ).toString()
+    private var tag = "RoomClient"
     override fun getLayout() = R.layout.room_item_resource
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -43,4 +38,9 @@ class RoomItem (
             && other.servicePort == servicePort
             && other.roomName == roomName
             && other.roomDescription == roomDescription
+
+    fun connect () {
+        if (roomClient != null ) return
+        roomClient = RoomClient(host, servicePort).apply { start() }
+    }
 }
