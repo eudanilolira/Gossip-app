@@ -30,12 +30,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        startComponents()
-        setUpListeners()
-
         ActivityCompat.requestPermissions(
             this, arrayOf(Manifest.permission.INTERNET), GossipApplication.INTERNET_RQ
         )
+
+        startComponents()
+        setUpListeners()
     }
 
     private fun startComponents () {

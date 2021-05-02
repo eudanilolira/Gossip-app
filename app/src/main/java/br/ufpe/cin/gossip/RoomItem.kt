@@ -10,12 +10,15 @@ import androidx.annotation.RequiresApi
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
+import java.net.InetAddress
 
 @RequiresApi(Build.VERSION_CODES.N)
-class RoomItem (record: Map<String, String>, var device: WifiP2pDevice): Item<GroupieViewHolder>() {
-
-    var roomName: String = record.getOrDefault("roomName", "Sem nome")
-    var roomDescription: String = record.getOrDefault("roomDescription", "Sem descrição")
+class RoomItem (
+    var roomName: String,
+    var roomDescription: String,
+    private var host: InetAddress,
+    private var servicePort: Int
+): Item<GroupieViewHolder>() {
 
 //    var roomName: String = Base64.decode(
 //        record.getOrDefault("roomName", "Sem nome").toByteArray(), 0
@@ -23,9 +26,6 @@ class RoomItem (record: Map<String, String>, var device: WifiP2pDevice): Item<Gr
 //    var roomDescription: String = Base64.decode(
 //        record.getOrDefault("roomDescription", "Sem descrição").toByteArray(), 0
 //    ).toString()
-    val roomImage = record.getOrDefault("roomImage", "")
-    val port: Int = record["servicePort"].toString().toInt()
-
     override fun getLayout() = R.layout.room_item_resource
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
@@ -39,7 +39,8 @@ class RoomItem (record: Map<String, String>, var device: WifiP2pDevice): Item<Gr
     }
     override fun equals (other: Any?)
     = (other is RoomItem)
-            && other.device == device
+            && other.host == host
+            && other.servicePort == servicePort
             && other.roomName == roomName
             && other.roomDescription == roomDescription
 }

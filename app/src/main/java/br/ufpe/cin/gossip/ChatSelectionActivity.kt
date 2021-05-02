@@ -8,14 +8,19 @@ import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.nsd.NsdManager
+import android.net.nsd.NsdServiceInfo
 import android.net.wifi.p2p.WifiP2pConfig
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pDeviceList
 import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
+import android.nfc.Tag
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.widget.*
@@ -37,9 +42,6 @@ class ChatSelectionActivity : AppCompatActivity() {
     private val adapter = GroupAdapter<GroupieViewHolder>()
 
     private lateinit var connectionInfoListener: WifiP2pManager.ConnectionInfoListener
-    private lateinit var peerListListener: WifiP2pManager.PeerListListener
-
-    private var device: WifiP2pDevice? = null
 
     var tag: String = "ChatSelection"
 
@@ -160,39 +162,6 @@ class ChatSelectionActivity : AppCompatActivity() {
 
         adapter.setOnItemClickListener { item, view ->
 
-            if (GossipApplication.roomClient != null ) {
-                GossipApplication.roomClient?.closeSocket()
-            }
-
-            val roomItem = item as RoomItem
-            device = roomItem.device
-
-
-            var config = WifiP2pConfig()
-            config.deviceAddress = roomItem.device.deviceAddress
-            config.groupOwnerIntent = 0
-
-            if (
-                ActivityCompat.checkSelfPermission(
-                    applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                        PackageManager.PERMISSION_GRANTED
-            ) {
-                GossipApplication.p2pManager.connect(
-                    GossipApplication.p2pChannel, config, object: WifiP2pManager.ActionListener {
-                        override fun onSuccess() {
-                            Log.d(tag, "Connected successfully")
-                            GossipApplication.roomClient = RoomClient(roomItem.port, roomItem)
-                        }
-                        override fun onFailure(reason: Int) {
-                            Log.d(tag, "Error $reason while trying to connect")
-                        }
-                    }
-                )
-            }
-            else {
-                Toast.makeText(applicationContext, "Permissão negada", Toast.LENGTH_SHORT).show()
-            }
-
         }
     }
 
@@ -200,60 +169,69 @@ class ChatSelectionActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     private fun discoverServices () {
         Log.d(tag, "Discover Services Function Called")
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions (
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                GossipApplication.FINE_LOCATION_RQ
-            )
-            return
-        }
 
-        val txtListener = WifiP2pManager.DnsSdTxtRecordListener { fullDomain, record, device ->
-            Log.d(tag, "Room found at: $fullDomain (${device.deviceAddress})")
-            val room = RoomItem( record, device )
-            if (room !in GossipApplication.roomList) {
-                GossipApplication.roomList.add(room)
-                adapter.add( room )
+        val resolveListener = object : NsdManager.ResolveListener {
+            override fun onResolveFailed(serviceInfo: NsdServiceInfo?, errorCode: Int) {
+                Log.d(tag, "Resolve failed: $errorCode")
             }
-        }
 
-        val serviceListener = WifiP2pManager.DnsSdServiceResponseListener { instanceName, registrationType, srcDevice ->
-            Log.d(tag, "Found $instanceName")
-        }
-
-        GossipApplication.p2pManager.setDnsSdResponseListeners(
-            GossipApplication.p2pChannel,
-            serviceListener,
-            txtListener
-        )
-
-        var serviceRequest = WifiP2pDnsSdServiceRequest.newInstance()
-        GossipApplication.p2pManager.addServiceRequest(
-            GossipApplication.p2pChannel,
-            serviceRequest,
-            object : WifiP2pManager.ActionListener {
-                override fun onSuccess() {
-                    Log.d(tag, "Service Request Action Listener Started")
-                }
-                override fun onFailure(reason: Int) {
-                    Log.d(tag, "Service Request Action Listener Failed to Start. Error Code: $reason")
+            override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
+                Log.d(tag, "Resolve found $serviceInfo")
+                val roomName = serviceInfo.serviceName
+                val roomDescription = serviceInfo.attributes?.get("longtext")?.let { String(it) }
+                var roomItem = RoomItem(roomName!!, roomDescription!!, serviceInfo?.host, serviceInfo.port)
+                if (roomItem !in GossipApplication.roomList) {
+                    GossipApplication.roomList.add(roomItem)
+                    Handler (Looper.getMainLooper()).post {
+                        adapter.add( roomItem )
+                    }
                 }
             }
-        )
 
-        GossipApplication.p2pManager.discoverServices (
-            GossipApplication.p2pChannel,
-            object : WifiP2pManager.ActionListener {
-                override fun onSuccess() {
-                    Log.d(tag, "Started Action Listener")
-                }
-                override fun onFailure(reason: Int) {
-                    Log.d(tag, "Failed to start Action Listener. Error Code: $reason")
-                }
+        }
+
+        val discoveryListener = object: NsdManager.DiscoveryListener {
+            override fun onStartDiscoveryFailed(serviceType: String?, errorCode: Int) {
+                Log.d(tag, "Failed to start service discovery. Code: $errorCode")
+                GossipApplication.nsdManager.stopServiceDiscovery(this)
             }
+
+            override fun onStopDiscoveryFailed(serviceType: String?, errorCode: Int) {
+                Log.d(tag, "Failed to stop service discovery. Code: $errorCode")
+                GossipApplication.nsdManager.stopServiceDiscovery(this)
+            }
+
+            override fun onDiscoveryStarted(serviceType: String?) {
+                Log.d(tag, "Service discovery started")
+            }
+
+            override fun onDiscoveryStopped(serviceType: String?) {
+                Log.d(tag, "Service discovery stopped")
+            }
+
+            override fun onServiceFound(serviceInfo: NsdServiceInfo?) {
+                Log.d(tag, "Found Service $serviceInfo")
+                GossipApplication.nsdManager.resolveService(serviceInfo!!, resolveListener)
+            }
+
+            override fun onServiceLost(serviceInfo: NsdServiceInfo) {
+                Log.d(tag, "Service Lost")
+                val roomName = serviceInfo.serviceName
+                for (roomItem: RoomItem in GossipApplication.roomList) {
+                    if (roomItem.roomName == roomName){
+                        Handler (Looper.getMainLooper()).post { adapter.remove( roomItem ) }
+                    }
+                }
+
+            }
+
+        }
+
+
+        GossipApplication.nsdManager.discoverServices(
+            "_gossip._tcp",
+            NsdManager.PROTOCOL_DNS_SD,
+            discoveryListener
         )
     }
 }

@@ -5,15 +5,19 @@
 **/
 package br.ufpe.cin.gossip
 
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import kotlinx.coroutines.GlobalScope
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.NetworkInterface
 import java.net.Socket
+import java.util.*
 
 class RoomClient (private var servicePort: Int, var roomItem: RoomItem? = null) : Thread () {
     private lateinit var hostAddress: InetAddress
@@ -111,5 +115,8 @@ class RoomClient (private var servicePort: Int, var roomItem: RoomItem? = null) 
     fun closeSocket (){
         if (this.isAlive) this.interrupt()
         socket.close()
+    }
+
+    private fun getHostIpAddress() {
     }
 }

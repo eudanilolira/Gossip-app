@@ -23,7 +23,10 @@ class ClientRoomActivity : AppCompatActivity() {
         val roomsName = GossipApplication.roomClient?.roomItem?.roomName
         supportActionBar?.title = roomsName
 
-        GossipApplication.roomClient?.receiveActivity(this)
+        if (GossipApplication.roomClient != null) {
+            GossipApplication.roomClient?.receiveActivity(this)
+            GossipApplication.roomClient?.start()
+        }
 
     }
 

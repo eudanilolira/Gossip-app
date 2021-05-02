@@ -23,15 +23,9 @@ class GossipApplication : Application () {
     companion object {
         var userName: String = ""
         var profilePicture: Bitmap? = null
+        var roomName: String = ""
 
-        var permissionsNeeded: Array<String> = arrayOf(
-            android.Manifest.permission.ACCESS_WIFI_STATE,
-            android.Manifest.permission.CHANGE_WIFI_STATE,
-            android.Manifest.permission.ACCESS_NETWORK_STATE,
-            android.Manifest.permission.CHANGE_NETWORK_STATE,
-            android.Manifest.permission.INTERNET,
-            android.Manifest.permission.ACCESS_FINE_LOCATION
-        )
+        lateinit var nsdManager: NsdManager
 
         lateinit var p2pManager: WifiP2pManager
         lateinit var p2pChannel: WifiP2pManager.Channel
@@ -58,6 +52,9 @@ class GossipApplication : Application () {
 
     override fun onCreate() {
         super.onCreate()
+
+        nsdManager = getSystemService(Context.NSD_SERVICE) as NsdManager
+
         p2pManager = getSystemService(Context.WIFI_P2P_SERVICE) as WifiP2pManager
         p2pChannel = p2pManager.initialize(applicationContext, Looper.getMainLooper(), null)
         broadcastReceiver = WifiDirectBroadcastReceiver()
