@@ -66,12 +66,13 @@ class ChatSelectionActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        GossipApplication.tearDownServices()
+        unregisterReceiver(GossipApplication.broadcastReceiver)
+        GossipApplication.nsdManager.stopServiceDiscovery(GossipApplication.nsdDiscoveryListener)
         super.onPause()
     }
 
     override fun onDestroy() {
-        GossipApplication.tearDownServices()
+        GossipApplication.nsdManager.stopServiceDiscovery(GossipApplication.nsdDiscoveryListener)
         super.onDestroy()
     }
 
