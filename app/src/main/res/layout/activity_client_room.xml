@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#00FFFFFF"
     tools:context=".ClientRoomActivity">
 
     <Button
@@ -28,9 +29,9 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:background="@android:color/transparent"
         android:ems="10"
         android:inputType="textPersonName"
-        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/chat_button"
         app:layout_constraintStart_toStartOf="parent" />
@@ -46,4 +47,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/uploadImage"
+        android:layout_width="31dp"
+        android:layout_height="28dp"
+        android:foreground="@android:drawable/ic_menu_gallery"
+        android:shadowColor="#00FFFFFF"
+        android:textColor="#00FFFFFF"
+        app:backgroundTint="#00FFFFFF"
+        app:iconTint="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="@+id/chat_edit_text"
+        app:layout_constraintEnd_toEndOf="@+id/chat_edit_text"
+        app:layout_constraintTop_toBottomOf="@+id/chat_recycler_view"
+        app:strokeColor="#00FFFFFF" />
 </androidx.constraintlayout.widget.ConstraintLayout>

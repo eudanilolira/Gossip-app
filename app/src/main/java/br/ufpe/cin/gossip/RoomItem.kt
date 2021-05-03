@@ -1,20 +1,17 @@
 package br.ufpe.cin.gossip
 
-import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupieViewHolder
 import com.xwray.groupie.Item
-import java.io.IOException
 import java.net.InetAddress
-import java.net.InetSocketAddress
 import java.net.Socket
 
-class RoomItem (
+class RoomItem(
     var roomName: String,
-    var roomDescription: String,
-    private var host: InetAddress,
+    var roomDescription: String?,
+    var host: InetAddress,
     private var servicePort: Int
 )
     : Item<GroupieViewHolder>() {
@@ -29,7 +26,7 @@ class RoomItem (
         var roomImage = viewHolder.itemView.findViewById<ImageView>(R.id.roomImage)
 
         roomName.text = this.roomName
-        roomDescription.text = this.roomDescription
+        roomDescription.text = if (roomDescription != null) this.roomDescription.toString() else ""
         Picasso.get().load("http://i.imgur.com/DvpvklR.png").into(roomImage);
     }
     override fun equals (other: Any?)

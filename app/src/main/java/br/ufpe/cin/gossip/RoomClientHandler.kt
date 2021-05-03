@@ -5,11 +5,7 @@
 
 package br.ufpe.cin.gossip
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.widget.Toast
-import com.beust.klaxon.JsonObject
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -25,30 +21,42 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
 
     override fun run() {
         Log.d(tag, "Running")
-        var buffer = ByteArray(1024)
+        var buffer = ByteArray(16*1024)
         var bytes: Int
-        while (clientSocket != null) {
+        while (true) {
             try {
                 bytes = inputStream.read(buffer)
                 if (bytes > 0) {
-                    var tmpMsg = String(buffer, 0, bytes)
+                    val tmpMsg = String(buffer, 0, bytes)
                     val map = JSONObject(tmpMsg).toMap()
                     Log.d(tag, "Message Received: $map")
-                    var code =
+                    var code = 0
                     when(map["packetType"].toString())
                     {
-                        "message" -> ClientRoomActivity.MESSAGE_RECEIVED
-                        "handshake" -> ClientRoomActivity.HANDSHAKE
-                        "updatePicture" -> ClientRoomActivity.CHANGE_PICTURE
-                        "updateUsername" -> ClientRoomActivity.CHANGE_USERNAME
-                        "leave" -> ClientRoomActivity.LEAVE_ROOM
-                        else -> 0
+                        "message" -> {
+                            code = ClientRoomActivity.MESSAGE_RECEIVED
+                        }
+                        "handshake" -> {
+                            code = ClientRoomActivity.HANDSHAKE
+                            if (userName == "") {
+                                userName = map["userName"].toString()
+                                sendInfo()
+                            }
+                        }
+                        "updatePicture" -> {
+                            code = ClientRoomActivity.CHANGE_PICTURE
+                        }
+                        "updateUsername" -> {
+                            code = ClientRoomActivity.CHANGE_USERNAME
+                        }
+                        "leave" -> {
+                            code = ClientRoomActivity.LEAVE_ROOM
+                        }
+                        "file" -> {
+                            code = ClientRoomActivity.FILE
+                        }
                     }
                     serverRoomActivity.handler.obtainMessage( code, map ).sendToTarget()
-
-                    if (code == ClientRoomActivity.HANDSHAKE && userName == "") {
-                        userName = map["userName"].toString()
-                    }
                 }
             }
             catch (e: IOException) {
@@ -58,7 +66,7 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
     }
 
     fun writeToSocket(mapMessage: Map<String, String>) {
-        var msgString = JSONObject(mapMessage).toString()
+        val msgString = JSONObject(mapMessage).toString()
         Thread {
             try {
                 outputStream.write(msgString.toByteArray())
@@ -68,5 +76,13 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
             }
         }.start()
 
+    }
+
+    private fun sendInfo () {
+        val serverInfo: Map<String, String> = mapOf(
+            "port" to GossipApplication.roomServer?.serverImageReceiverPort.toString(),
+            "type" to "serverInfo"
+        )
+        writeToSocket(serverInfo)
     }
 }

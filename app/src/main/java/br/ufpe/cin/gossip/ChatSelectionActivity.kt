@@ -4,29 +4,18 @@ Nessa tela o usuário pode escolher entrar em salas já conhecidas, ou visualiza
 */
 package br.ufpe.cin.gossip
 
-import android.Manifest
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
-import android.net.wifi.p2p.WifiP2pConfig
-import android.net.wifi.p2p.WifiP2pDevice
-import android.net.wifi.p2p.WifiP2pDeviceList
 import android.net.wifi.p2p.WifiP2pManager
-import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
-import android.nfc.Tag
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.GroupieViewHolder
@@ -94,7 +83,7 @@ class ChatSelectionActivity : AppCompatActivity() {
             val ownerAddress: InetAddress = info.groupOwnerAddress
 
             if (info.isGroupOwner && info.groupFormed) {
-                Log.d(tag, "I'm the owner for some reason")
+                Log.d(tag, "I'm the owner")
             }
             else if (info.groupFormed) {
                 Log.d(tag, "Connected to $ownerAddress")
@@ -148,9 +137,9 @@ class ChatSelectionActivity : AppCompatActivity() {
 
             override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
                 Log.d(tag, "Resolve found $serviceInfo")
-                val roomName = serviceInfo.serviceName
+                val roomName = serviceInfo.serviceName.toString()
                 val roomDescription = serviceInfo.attributes?.get("longtext")?.let { String(it) }
-                var roomItem = RoomItem(roomName!!, roomDescription!!, serviceInfo?.host, serviceInfo.port)
+                var roomItem = RoomItem(roomName, roomDescription, serviceInfo?.host, serviceInfo.port)
                 if (roomItem !in GossipApplication.roomList) {
                     GossipApplication.roomList.add(roomItem)
                     Handler (Looper.getMainLooper()).post {
@@ -158,7 +147,6 @@ class ChatSelectionActivity : AppCompatActivity() {
                     }
                 }
             }
-
         }
 
         val discoveryListener = object: NsdManager.DiscoveryListener {
@@ -193,7 +181,6 @@ class ChatSelectionActivity : AppCompatActivity() {
                         Handler (Looper.getMainLooper()).post { adapter.remove( roomItem ) }
                     }
                 }
-
             }
         }
         GossipApplication.nsdDiscoveryListener = discoveryListener

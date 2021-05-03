@@ -7,7 +7,14 @@ class RoomServer ( private val socket: ServerSocket ) : Thread () {
     var clientSockets = mutableListOf<RoomClientHandler>()
     private var tag: String = "RoomServer"
     lateinit var serverRoomActivity: ServerRoomActivity
+    lateinit var serverImageReceiver: ServerImageReceiver
+    var serverImageReceiverPort: Int = 0
+
     override fun run() {
+        val serverSocket = ServerSocket(0)
+        serverImageReceiverPort = serverSocket.localPort
+        serverImageReceiver = ServerImageReceiver(serverSocket).apply { start() }
+
         var running = true
         while (running) {
             Log.d(tag, "Started Server Activity")
@@ -22,7 +29,8 @@ class RoomServer ( private val socket: ServerSocket ) : Thread () {
         if (!this::serverRoomActivity.isInitialized) serverRoomActivity = activity
     }
 
-    fun broadcastMessage (messageMap: Map<String, String>, sender: String = "") {
+    fun broadcastMessage (messageMap: Map<String, String>) {
+        val sender = messageMap["userName"].toString()
         for (roomClientHandler: RoomClientHandler in clientSockets) {
             if (sender == "" || roomClientHandler.userName != sender) {
                 Log.d(tag, "Message\"$messageMap\" sent to ${roomClientHandler.userName}")
