@@ -101,6 +101,9 @@ class ClientRoomActivity : AppCompatActivity() {
                         GossipApplication.room?.roomClient?.imgReceiverPort = map["port"].toString().toInt()
                         Log.d(tag, map["port"].toString().toInt().toString())
                     }
+                    IMAGE -> {
+                        adapter.add( ChatImageFrom("Teste") )
+                    }
                 }
                 return true
             }
