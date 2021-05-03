@@ -1,5 +1,6 @@
 package br.ufpe.cin.gossip
 
+import android.graphics.Bitmap
 import android.util.Log
 import java.net.ServerSocket
 
@@ -47,6 +48,24 @@ class RoomServer ( private val socket: ServerSocket ) : Thread () {
         )
         Log.d(tag, "Username: ${GossipApplication.userName}")
         broadcastMessage(messagePacket)
+    }
+
+    fun updatePicture(userName: String, img: Bitmap) {
+        for (roomClientHandler: RoomClientHandler in clientSockets) {
+            if (roomClientHandler.userName == userName) {
+                roomClientHandler.profilePicture = img
+            }
+        }
+    }
+
+    fun getProfilePicture(userName: String) : Bitmap? {
+        if (userName == "") return null
+        for (roomClientHandler: RoomClientHandler in clientSockets) {
+            if (roomClientHandler.userName == userName) {
+                return roomClientHandler.profilePicture
+            }
+        }
+        return null
     }
 
 }

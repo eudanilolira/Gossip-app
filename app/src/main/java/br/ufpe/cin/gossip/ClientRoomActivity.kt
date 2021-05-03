@@ -94,15 +94,9 @@ class ClientRoomActivity : AppCompatActivity() {
                         val tmpMsg = "${map["userName"]} saiu da conversa"
                         adapter.add( ChatFromItem(tmpMsg) )
                     }
-                    CHANGE_PICTURE -> {}
-                    CHANGE_USERNAME -> {}
-                    FILE -> {}
                     SERVER_INFO -> {
                         GossipApplication.room?.roomClient?.imgReceiverPort = map["port"].toString().toInt()
                         Log.d(tag, map["port"].toString().toInt().toString())
-                    }
-                    IMAGE -> {
-                        adapter.add( ChatImageFrom("Teste") )
                     }
                 }
                 return true

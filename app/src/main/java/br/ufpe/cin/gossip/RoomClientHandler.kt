@@ -5,6 +5,7 @@
 
 package br.ufpe.cin.gossip
 
+import android.graphics.Bitmap
 import android.util.Log
 import org.json.JSONObject
 import java.io.IOException
@@ -18,6 +19,7 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
     private var outputStream: OutputStream = clientSocket.getOutputStream()
     private var serverRoomActivity: ServerRoomActivity = GossipApplication.roomServer!!.serverRoomActivity
     var userName: String = ""
+    var profilePicture: Bitmap? = null
 
     override fun run() {
         Log.d(tag, "Running")
@@ -81,7 +83,7 @@ class RoomClientHandler (private val clientSocket: Socket) : Thread (){
     private fun sendInfo () {
         val serverInfo: Map<String, String> = mapOf(
             "port" to GossipApplication.roomServer?.serverImageReceiverPort.toString(),
-            "type" to "serverInfo"
+            "ype" to "serverInfo"
         )
         writeToSocket(serverInfo)
     }

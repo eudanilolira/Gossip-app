@@ -6,6 +6,8 @@
 package br.ufpe.cin.gossip
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import androidx.core.graphics.drawable.toDrawable
@@ -15,6 +17,8 @@ import java.io.*
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.logging.Handler
+import kotlin.math.log
 
 class RoomClient (private var hostAddress: InetAddress, private var servicePort: Int) : Thread () {
     private lateinit var socket: Socket
@@ -24,6 +28,8 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
     private lateinit var clientRoomActivity: ClientRoomActivity
     var userName: String = ""
     var imgReceiverPort: Int = 0
+
+    var userNameToPictureMap = mutableMapOf<String, Bitmap>()
 
     private var tag: String = "RoomClient"
 
@@ -43,7 +49,11 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
         }
         var buffer = ByteArray(16*1024)
         var bytes: Int
-        if (connected) handShake()
+        if (connected) {
+            handShake()
+            if ( GossipApplication.profilePicture != null )
+                sendProfilePicture()
+        }
         while (socket != null) {
             try {
                 bytes = inputStream.read(buffer)
@@ -55,11 +65,23 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
                         when(map["packetType"].toString())
                         {
                             "message" -> ClientRoomActivity.MESSAGE_RECEIVED
-                            "updatePicture" -> ClientRoomActivity.CHANGE_PICTURE
-                            "updateUsername" -> ClientRoomActivity.CHANGE_USERNAME
                             "leave" -> ClientRoomActivity.LEAVE_ROOM
                             "hello" -> ClientRoomActivity.HELLO
                             "file" -> ClientRoomActivity.FILE
+                            "profilePicture" -> {
+                                val img: Bitmap = BitmapFactory.decodeStream(inputStream)
+                                userNameToPictureMap.put(map["userName"].toString(), img)
+                                -1
+                            }
+                            "image" -> {
+                                val img: Bitmap = BitmapFactory.decodeStream(inputStream)
+                                android.os.Handler(Looper.getMainLooper()).post {
+                                    clientRoomActivity.adapter.add (ChatImageFrom (
+                                        map["userName"].toString(), img
+                                            ))
+                                }
+                                -1
+                            }
                             else -> 0
                         }
                     if (code != 0 && this::clientRoomActivity.isInitialized) {
@@ -76,6 +98,23 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
                 Log.e(tag, "Failed to receive message")
             }
         }
+    }
+
+    private fun sendProfilePicture() {
+        val imgFile = GossipApplication.profilePicture!!
+        val stream: ByteArrayOutputStream = ByteArrayOutputStream()
+        imgFile.compress(Bitmap.CompressFormat.JPEG, 50, stream)
+        val imgBytes: ByteArray = stream.toByteArray()
+
+        val imgPacket: Map<String, String> = mapOf(
+            "type" to "profilePicture",
+            "userName" to GossipApplication.userName,
+            "length" to imgBytes.size.toString()
+        )
+
+        Log.d(tag, "${imgPacket["length"]}")
+        sendFileMap(imgPacket, imgBytes)
+        Log.d(tag, "Sending Image")
     }
 
     fun handShake() {
@@ -100,7 +139,6 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
         val stream: ByteArrayOutputStream = ByteArrayOutputStream()
         imgFile.compress(Bitmap.CompressFormat.JPEG, 50, stream)
         val imgBytes: ByteArray = stream.toByteArray()
-        // val encodedFile: String = Base64.encodeToString(imgBytes, Base64.DEFAULT)
 
         val imgPacket: Map<String, String> = mapOf(
             "type" to "image",
@@ -108,6 +146,7 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
             "length" to imgBytes.size.toString()
         )
 
+        Log.d(tag, "${imgPacket["length"]}")
         sendFileMap(imgPacket, imgBytes)
         Log.d(tag, "Sending Image")
     }
@@ -132,23 +171,10 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
         Thread {
             val socket = Socket()
             socket.connect(InetSocketAddress(GossipApplication.room?.host, imgReceiverPort))
-            Log.d(tag, "Socket connected")
             socket.getOutputStream().write(msgString)
+            Log.d(tag, "Sending ${file.size} bytes")
             socket.getOutputStream().write(file)
 
-//            var s = 0
-//            var offset = if (msgString.size < 1024) msgString.size else 1024
-//            while (true) {
-//                Log.d(tag, "$s to $offset")
-//                socket.getOutputStream().write(msgString.copyOfRange(s, offset))
-//                if (offset < msgString.size) {
-//                    s = offset+1
-//                    offset = if (msgString.size < offset + 1024) msgString.size else offset+1024
-//                }
-//                else {
-//                    break
-//                }
-//            }
             socket.close()
         }.start()
     }

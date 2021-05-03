@@ -73,4 +73,7 @@ class ServerRoomActivity : AppCompatActivity() {
         }
     }
 
+    fun changePicture (img: Bitmap) {
+        imgView.setImageBitmap(img)
+    }
 }

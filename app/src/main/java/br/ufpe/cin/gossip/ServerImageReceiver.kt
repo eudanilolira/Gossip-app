@@ -1,8 +1,15 @@
 package br.ufpe.cin.gossip
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.lang.Exception
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -15,33 +22,37 @@ class ServerImageReceiver (private val serverSocket: ServerSocket): Thread () {
         Log.d(tag, "ServerImageReceiver Started")
         while (running) {
             val clientSocket = serverSocket.accept()
-            Log.d(tag, "Connection for file received")
-
             val clientThread = Thread { receiveFile(socket = clientSocket) }.apply { start() }
         }
     }
 
     private fun receiveFile (socket: Socket) {
-        Log.d(tag, "File Received")
         val inputStream = socket.getInputStream()
+        val buffer = ByteArray(1024)
 
-        var b = ByteArrayOutputStream()
-        var buffer = ByteArray(1024)
+        try {
+            val i = socket.getInputStream().read(buffer)
+            val map = JSONObject(String(buffer, 0, i)).toMap()
+            Log.d(tag, "File Received")
+            val img: Bitmap = BitmapFactory.decodeStream(inputStream)
+            socket.close()
 
-        val i = socket.getInputStream().read(buffer)
-        var tmpMsg = String(buffer, 0, i)
-        val map = JSONObject(tmpMsg).toMap()
-
-        val size = map["length"].toString().toInt()
-
-        val imgBuffer = ByteArray(size)
-
-//        while (true) {
-//            val r = inputStream.read(byteArray)
-//            if (r < 0 ) break;
-//            b.write(byteArray)
-//        }
-//        socket.close()
-        Log.d(tag, String(b.toByteArray()))
+            when (map["type"]) {
+                "profilePicture" -> {
+                    GossipApplication.roomServer?.updatePicture(
+                        map["userName"].toString(), img
+                    )
+                }
+                "image" -> {
+                    Log.d(tag, "Image received from ${map["userName"]}")
+                    Handler (Looper.getMainLooper()).post {
+                        GossipApplication.roomServer?.serverRoomActivity?.changePicture(img)
+                    }
+                }
+            }
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
