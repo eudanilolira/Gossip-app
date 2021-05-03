@@ -5,11 +5,13 @@
 **/
 package br.ufpe.cin.gossip
 
+import android.graphics.Bitmap
+import android.util.Base64
 import android.util.Log
+import androidx.core.graphics.drawable.toDrawable
+import kotlinx.coroutines.delay
 import org.json.JSONObject
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -21,6 +23,7 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
     private var connected: Boolean = true
     private lateinit var clientRoomActivity: ClientRoomActivity
     var userName: String = ""
+    var imgReceiverPort: Int = 0
 
     private var tag: String = "RoomClient"
 
@@ -38,9 +41,9 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
             Log.e(tag, "Failed to connect to Socket")
             return
         }
-        if (connected) handShake()
-        var buffer = ByteArray(1024)
+        var buffer = ByteArray(16*1024)
         var bytes: Int
+        if (connected) handShake()
         while (socket != null) {
             try {
                 bytes = inputStream.read(buffer)
@@ -56,9 +59,16 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
                             "updateUsername" -> ClientRoomActivity.CHANGE_USERNAME
                             "leave" -> ClientRoomActivity.LEAVE_ROOM
                             "hello" -> ClientRoomActivity.HELLO
+                            "file" -> ClientRoomActivity.FILE
                             else -> 0
                         }
-                    clientRoomActivity.handler.obtainMessage( code, map ).sendToTarget()
+                    if (code != 0 && this::clientRoomActivity.isInitialized) {
+                        clientRoomActivity.handler.obtainMessage(code, map).sendToTarget()
+                    }
+                    else {
+                        imgReceiverPort = map["port"].toString().toInt()
+                        Log.d(tag, imgReceiverPort.toString())
+                    }
                 }
             }
             catch (e: IOException) {
@@ -68,7 +78,7 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
         }
     }
 
-    private fun handShake() {
+    fun handShake() {
         var myInfo: Map<String, String> = mapOf(
             "userName" to GossipApplication.userName,
             "profilePicture" to "",
@@ -86,7 +96,29 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
         writeToSocket(messagePacket)
     }
 
-    fun writeToSocket(mapMessage: Map<String, String>) {
+    fun sendImage(imgFile: Bitmap) {
+        val stream: ByteArrayOutputStream = ByteArrayOutputStream()
+        imgFile.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val imgBytes: ByteArray = stream.toByteArray()
+        val encodedFile: String = Base64.encodeToString(imgBytes, Base64.DEFAULT)
+
+        val info: Map<String, String> = mapOf(
+            "userName" to GossipApplication.userName,
+            "packetType" to "file"
+        )
+
+        writeToSocket(info)
+
+        val imgPacket: Map<String, String> = mapOf(
+            "type" to "image",
+            "content" to encodedFile,
+            "userName" to GossipApplication.userName
+        )
+        sendFileMap(imgPacket)
+        Log.d(tag, "Sending Image")
+    }
+
+    private fun writeToSocket(mapMessage: Map<String, String>) {
 
         var msgString = JSONObject(mapMessage).toString()
         Thread {
@@ -98,6 +130,18 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
                 e.printStackTrace()
                 Log.e(tag, "Failed to send message")
             }
+        }.start()
+    }
+
+    private fun sendFileMap(mapMessage: Map<String, String>) {
+        val msgString = JSONObject(mapMessage).toString()
+        Thread {
+            val socket = Socket()
+            Log.d(tag, GossipApplication.room?.host.toString())
+            socket.connect(InetSocketAddress(GossipApplication.room?.host, imgReceiverPort))
+            Log.d(tag, "Socket connected")
+            socket.getOutputStream().write(msgString.toByteArray())
+            socket.close()
         }.start()
     }
 

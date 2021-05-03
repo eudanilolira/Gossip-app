@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             val uri = data.data
             val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
 
-            profilePicture .setImageBitmap(imageBitmap)
+            profilePicture.setImageBitmap(imageBitmap)
             profilePictureButton.alpha = 0F
             GossipApplication.profilePicture = imageBitmap
         }
