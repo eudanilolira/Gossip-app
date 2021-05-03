@@ -101,6 +101,9 @@ class ChatSelectionActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.N)
     private fun setUpListeners () {
         newRoomButton.setOnClickListener {
+
+            GossipApplication.tearDownServices()
+
             if (!GossipApplication.runningServer) {
                 var newRoomIntent: Intent = Intent(this, NewRoomActivity::class.java)
                 startActivity(newRoomIntent)

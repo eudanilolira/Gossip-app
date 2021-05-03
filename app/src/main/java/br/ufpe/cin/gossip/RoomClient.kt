@@ -98,29 +98,23 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
 
     fun sendImage(imgFile: Bitmap) {
         val stream: ByteArrayOutputStream = ByteArrayOutputStream()
-        imgFile.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        imgFile.compress(Bitmap.CompressFormat.JPEG, 50, stream)
         val imgBytes: ByteArray = stream.toByteArray()
-        val encodedFile: String = Base64.encodeToString(imgBytes, Base64.DEFAULT)
-
-        val info: Map<String, String> = mapOf(
-            "userName" to GossipApplication.userName,
-            "packetType" to "file"
-        )
-
-        writeToSocket(info)
+        // val encodedFile: String = Base64.encodeToString(imgBytes, Base64.DEFAULT)
 
         val imgPacket: Map<String, String> = mapOf(
             "type" to "image",
-            "content" to encodedFile,
-            "userName" to GossipApplication.userName
+            "userName" to GossipApplication.userName,
+            "length" to imgBytes.size.toString()
         )
-        sendFileMap(imgPacket)
+
+        sendFileMap(imgPacket, imgBytes)
         Log.d(tag, "Sending Image")
     }
 
     private fun writeToSocket(mapMessage: Map<String, String>) {
 
-        var msgString = JSONObject(mapMessage).toString()
+        val msgString = JSONObject(mapMessage).toString()
         Thread {
             try {
                 outputStream.write(msgString.toByteArray())
@@ -133,14 +127,28 @@ class RoomClient (private var hostAddress: InetAddress, private var servicePort:
         }.start()
     }
 
-    private fun sendFileMap(mapMessage: Map<String, String>) {
-        val msgString = JSONObject(mapMessage).toString()
+    private fun sendFileMap(mapMessage: Map<String, String>, file: ByteArray) {
+        val msgString = JSONObject(mapMessage).toString().toByteArray()
         Thread {
             val socket = Socket()
-            Log.d(tag, GossipApplication.room?.host.toString())
             socket.connect(InetSocketAddress(GossipApplication.room?.host, imgReceiverPort))
             Log.d(tag, "Socket connected")
-            socket.getOutputStream().write(msgString.toByteArray())
+            socket.getOutputStream().write(msgString)
+            socket.getOutputStream().write(file)
+
+//            var s = 0
+//            var offset = if (msgString.size < 1024) msgString.size else 1024
+//            while (true) {
+//                Log.d(tag, "$s to $offset")
+//                socket.getOutputStream().write(msgString.copyOfRange(s, offset))
+//                if (offset < msgString.size) {
+//                    s = offset+1
+//                    offset = if (msgString.size < offset + 1024) msgString.size else offset+1024
+//                }
+//                else {
+//                    break
+//                }
+//            }
             socket.close()
         }.start()
     }
