@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         ActivityCompat.requestPermissions(
             this, arrayOf(Manifest.permission.INTERNET), GossipApplication.INTERNET_RQ
         )

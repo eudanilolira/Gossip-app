@@ -23,6 +23,7 @@ import java.nio.file.Files
 class ServerRoomActivity : AppCompatActivity() {
     private lateinit var lastReceivedMessage: TextView
     private lateinit var answerButton: Button
+    lateinit var chat_leave_button: Button
     private lateinit var imgView: ImageView
     lateinit var handler: Handler
 
@@ -42,6 +43,7 @@ class ServerRoomActivity : AppCompatActivity() {
         lastReceivedMessage = findViewById(R.id.lastReceivedMessage)
         answerButton = findViewById(R.id.answerTest)
         imgView = findViewById(R.id.receivedPicture)
+        chat_leave_button = findViewById(R.id.leaveChatButton)
 
         handler = Handler(object : Handler.Callback {
             override fun handleMessage(msg: Message): Boolean {
@@ -70,6 +72,10 @@ class ServerRoomActivity : AppCompatActivity() {
     private fun setUpListeners () {
         answerButton.setOnClickListener {
             GossipApplication.roomServer?.sendMessage("Lana rainha, o resto é nadinha!")
+        }
+
+        chat_leave_button.setOnClickListener {
+            
         }
     }
 

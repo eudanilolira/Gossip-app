@@ -26,7 +26,7 @@ class ClientRoomActivity : AppCompatActivity() {
     lateinit var chat_recycler_view: RecyclerView
     lateinit var chat_button: Button
     lateinit var chat_edit_text: EditText
-
+    lateinit var chat_leave_button: Button
     lateinit var uploadImageButton: Button
     var adapter = GroupAdapter<GroupieViewHolder>()
 
@@ -72,6 +72,7 @@ class ClientRoomActivity : AppCompatActivity() {
         chat_recycler_view = findViewById(R.id.chat_recycler_view)
         chat_recycler_view.adapter = adapter
 
+        chat_leave_button = findViewById(R.id.leaveChatButton)
         chat_button = findViewById(R.id.chat_button)
         chat_edit_text = findViewById(R.id.chat_edit_text)
 
@@ -108,6 +109,10 @@ class ClientRoomActivity : AppCompatActivity() {
     private fun setupListeners () {
         chat_button.setOnClickListener {
             performSendMessage()
+        }
+
+        chat_leave_button.setOnClickListener {
+
         }
 
         uploadImageButton.setOnClickListener {
